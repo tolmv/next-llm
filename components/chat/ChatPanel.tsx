@@ -9,6 +9,10 @@ import { DefaultChatTransport } from "ai";
 import { inputAtom, isStreamingAtom, messagesAtom } from "@/state/chat";
 import { MessageInput } from "@/components/chat/MessageInput";
 import { MessageList } from "@/components/chat/MessageList";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import type { ChatUIMessage } from "@/lib/ai-types";
 
 export function ChatPanel() {
   const user = useUser();
@@ -16,7 +20,12 @@ export function ChatPanel() {
   const [input, setInput] = useAtom(inputAtom);
   const [isStreaming, setIsStreaming] = useAtom(isStreamingAtom);
 
-  const { messages: chatMessages, sendMessage, status, stop } = useChat({
+  const {
+    messages: chatMessages,
+    sendMessage,
+    status,
+    stop,
+  } = useChat<ChatUIMessage>({
     transport: new DefaultChatTransport({
       api: "/api/chat",
     }),
@@ -24,9 +33,7 @@ export function ChatPanel() {
 
   const isLoading = status === "submitted" || status === "streaming";
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value);
   };
 
@@ -34,8 +41,11 @@ export function ChatPanel() {
     event.preventDefault();
     const trimmed = input.trim();
     if (!trimmed || isLoading) return;
-    await sendMessage({ text: trimmed });
+    console.log("Before clearing input:", input);
     setInput("");
+    console.log("After setInput('') called");
+    await sendMessage({ text: trimmed });
+    console.log("After sendMessage completed");
   };
 
   useEffect(() => {
@@ -59,17 +69,16 @@ export function ChatPanel() {
             </p>
           </div>
         </div>
-        <div className="rounded-2xl border border-dashed border-zinc-200 bg-white p-6 text-sm text-zinc-600">
-          This dashboard is available only to authenticated users.
-          <div className="mt-4">
-            <Link
-              href="/handler/sign-in"
-              className="rounded-full border border-zinc-200 px-4 py-2 text-sm text-zinc-700 hover:border-zinc-300"
-            >
-              Sign in
-            </Link>
-          </div>
-        </div>
+        <Card className="border-dashed">
+          <CardContent className="text-sm">
+            This dashboard is available only to authenticated users.
+            <div className="mt-4">
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/handler/sign-in">Sign in</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </section>
     );
   }
@@ -85,9 +94,9 @@ export function ChatPanel() {
             Jotai drives UI state; messages stream from the AI route.
           </p>
         </div>
-        <div className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+        <Badge className={isStreaming ? "bg-emerald-600" : "bg-zinc-500"}>
           {isStreaming ? "Streaming" : "Idle"}
-        </div>
+        </Badge>
       </div>
 
       <MessageList messages={messages} />

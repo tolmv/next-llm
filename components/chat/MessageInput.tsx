@@ -1,4 +1,6 @@
 import type { ChangeEvent, FormEvent } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 type MessageInputProps = {
   input: string;
@@ -15,37 +17,51 @@ export function MessageInput({
   onSubmit,
   onStop,
 }: MessageInputProps) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (!isLoading && input.trim().length > 0) {
+        const form = e.currentTarget.form;
+        if (form) {
+          form.requestSubmit();
+        }
+      }
+    }
+  };
+
   return (
     <form
       onSubmit={onSubmit}
       className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-4"
     >
-      <textarea
+      <Textarea
         value={input}
         onChange={onInputChange}
+        onKeyDown={handleKeyDown}
         placeholder="Ask the assistant to review an architecture, design a component, or debug a bug."
         rows={4}
-        className="w-full resize-none rounded-xl border border-zinc-200 px-3 py-2 text-sm text-zinc-800 outline-none focus:border-zinc-400"
+        className="resize-none"
       />
       <div className="flex items-center justify-between text-xs text-zinc-500">
-        <span>Streaming is enabled via Vercel AI SDK.</span>
+        <span>Press Enter to send, Shift+Enter for new line</span>
         <div className="flex items-center gap-2">
           {isLoading ? (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
               onClick={onStop}
-              className="rounded-full border border-zinc-200 px-3 py-1 text-zinc-600 hover:border-zinc-300"
             >
               Stop
-            </button>
+            </Button>
           ) : null}
-          <button
+          <Button
             type="submit"
+            size="sm"
             disabled={isLoading || input.trim().length === 0}
-            className="rounded-full bg-zinc-900 px-4 py-1 text-white disabled:cursor-not-allowed disabled:bg-zinc-300"
           >
             Send
-          </button>
+          </Button>
         </div>
       </div>
     </form>

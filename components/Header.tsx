@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { UserButton, useUser } from "@stackframe/stack";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export function Header() {
   const user = useUser();
@@ -9,9 +11,9 @@ export function Header() {
   return (
     <header className="flex w-full items-center justify-between border-b border-zinc-200 bg-white px-6 py-4 text-sm text-zinc-800">
       <div className="flex items-center gap-3">
-        <div className="rounded-full bg-zinc-900 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
+        <Badge className="bg-zinc-900 text-white uppercase tracking-wide">
           Next LLM
-        </div>
+        </Badge>
       </div>
       <div className="flex items-center gap-4">
         {user ? (
@@ -19,12 +21,9 @@ export function Header() {
             Signed in as {user.displayName ?? user.primaryEmail ?? "User"}
           </span>
         ) : (
-          <Link
-            className="rounded-full border border-zinc-200 px-3 py-1 text-zinc-700 hover:border-zinc-300"
-            href="/handler/sign-in"
-          >
-            Sign in
-          </Link>
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/handler/sign-in">Sign in</Link>
+          </Button>
         )}
         <UserButton />
       </div>
